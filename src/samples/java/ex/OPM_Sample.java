@@ -62,6 +62,17 @@ public class OPM_Sample extends OPMSuper implements Comparator<String> {
     public void doIt() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(Writer::fpFlush, 1L, 1L, TimeUnit.SECONDS);
     }
+    
+    static class OPM468 {
+    	@Override
+    	public boolean equals(Object o) {
+    		if (!(o instanceof OPM468)) {
+    			return false;
+    		}
+    		
+    		return true;
+    	}
+    }
 }
 
 abstract class OPMSuper {
