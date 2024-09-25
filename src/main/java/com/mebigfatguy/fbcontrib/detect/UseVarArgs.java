@@ -85,49 +85,55 @@ public class UseVarArgs extends PreorderVisitor implements Detector {
 				return;
 			}
 
-			if (Values.CONSTRUCTOR.equals(getMethodName()) && javaClass.getClassName().contains("$")) {
-				return;
-			}
+			boolean isVarMethod  = (obj.getAccessFlags() & Constants.ACC_VARARGS) != 0;
 
-			List<String> types = SignatureUtils.getParameterSignatures(obj.getSignature());
-			if ((types.isEmpty()) || (types.size() > 2)) {
-				return;
-			}
-
-			if ((obj.getAccessFlags() & Constants.ACC_VARARGS) != 0) {
-				return;
-			}
-
-			String lastParmSig = types.get(types.size() - 1);
-			if (!lastParmSig.startsWith(Values.SIG_ARRAY_PREFIX)
-					|| lastParmSig.startsWith(Values.SIG_ARRAY_OF_ARRAYS_PREFIX)) {
-				return;
-			}
-
-			if (SignatureBuilder.SIG_BYTE_ARRAY.equals(lastParmSig)
-					|| SignatureBuilder.SIG_CHAR_ARRAY.equals(lastParmSig)) {
-				return;
-			}
-
-			if (hasSimilarParms(types)) {
-				return;
-			}
-
-			if (obj.isStatic() && "main".equals(obj.getName()) && SIG_STRING_ARRAY_TO_VOID.equals(obj.getSignature())) {
-				return;
-			}
-
-			if (!obj.isPrivate() && !obj.isStatic() && isInherited(obj)) {
-				return;
-			}
+			boolean isConvertable = !isVarMethod && methodHasConvertableLastParam(obj);
 
 			super.visitMethod(obj);
-			bugReporter.reportBug(new BugInstance(this, BugType.UVA_USE_VAR_ARGS.name(), LOW_PRIORITY).addClass(this)
+			
+			if (isConvertable) {
+				bugReporter.reportBug(new BugInstance(this, BugType.UVA_USE_VAR_ARGS.name(), LOW_PRIORITY).addClass(this)
 					.addMethod(this));
+			}
 
 		} catch (ClassNotFoundException cnfe) {
 			bugReporter.reportMissingClass(cnfe);
 		}
+	}
+	
+	public boolean methodHasConvertableLastParam(Method method) throws ClassNotFoundException {
+		if (Values.CONSTRUCTOR.equals(getMethodName()) && javaClass.getClassName().contains("$")) {
+			return false;
+		}
+		List<String> types = SignatureUtils.getParameterSignatures(method.getSignature());
+		if ((types.isEmpty()) || (types.size() > 2)) {
+			return false;
+		}
+
+		String lastParmSig = types.get(types.size() - 1);
+		if (!lastParmSig.startsWith(Values.SIG_ARRAY_PREFIX)
+				|| lastParmSig.startsWith(Values.SIG_ARRAY_OF_ARRAYS_PREFIX)) {
+			return false;
+		}
+
+		if (SignatureBuilder.SIG_BYTE_ARRAY.equals(lastParmSig)
+				|| SignatureBuilder.SIG_CHAR_ARRAY.equals(lastParmSig)) {
+			return false;
+		}
+
+		if (hasSimilarParms(types)) {
+			return false;
+		}
+
+		if (method.isStatic() && "main".equals(method.getName()) && SIG_STRING_ARRAY_TO_VOID.equals(method.getSignature())) {
+			return false;
+		}
+
+		if (!method.isPrivate() && !method.isStatic() && isInherited(method)) {
+			return false;
+		}
+		
+		return true;
 	}
 
 	/**
