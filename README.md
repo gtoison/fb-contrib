@@ -51,8 +51,8 @@ Contributors
 * Piotrek Żygieło
 
 
-fb-contrib has two main branches, 'findbugs' and 'spotbugs'. Code is committed to findbugs, and then merged to spotbugs.
-It is preferable therefore to create merge requests against the findbugs branch. Thanks!
+fb-contrib has two main branches, 'findbugs' and 'spotbugs'. Code is committed to spotbugs, and then merged back to findbugs.
+It is preferable therefore to create merge requests against the spotbugs branch. Thanks!
 
 
 ## Setting up for Development - Ant
