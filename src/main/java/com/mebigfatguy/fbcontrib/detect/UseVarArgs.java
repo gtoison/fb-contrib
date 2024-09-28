@@ -21,19 +21,23 @@ package com.mebigfatguy.fbcontrib.detect;
 import java.util.List;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Code;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 
+import com.mebigfatguy.fbcontrib.collect.MethodInfo;
+import com.mebigfatguy.fbcontrib.collect.Statistics;
 import com.mebigfatguy.fbcontrib.utils.BugType;
 import com.mebigfatguy.fbcontrib.utils.SignatureBuilder;
 import com.mebigfatguy.fbcontrib.utils.SignatureUtils;
+import com.mebigfatguy.fbcontrib.utils.TernaryPatcher;
 import com.mebigfatguy.fbcontrib.utils.Values;
 
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
-import edu.umd.cs.findbugs.Detector;
+import edu.umd.cs.findbugs.BytecodeScanningDetector;
+import edu.umd.cs.findbugs.OpcodeStack;
 import edu.umd.cs.findbugs.ba.ClassContext;
-import edu.umd.cs.findbugs.visitclass.PreorderVisitor;
 
 /**
  * looks for definitions of methods that have an array as the last parameter.
@@ -41,13 +45,14 @@ import edu.umd.cs.findbugs.visitclass.PreorderVisitor;
  * flexible for clients of this method to define this parameter as a vararg
  * parameter.
  */
-public class UseVarArgs extends PreorderVisitor implements Detector {
+public class UseVarArgs extends BytecodeScanningDetector {
 
 	public static final String SIG_STRING_ARRAY_TO_VOID = new SignatureBuilder()
 			.withParamTypes(SignatureBuilder.SIG_STRING_ARRAY).toString();
 
 	private final BugReporter bugReporter;
 	private JavaClass javaClass;
+	private OpcodeStack stack;
 
 	public UseVarArgs(BugReporter bugReporter) {
 		this.bugReporter = bugReporter;
@@ -64,7 +69,12 @@ public class UseVarArgs extends PreorderVisitor implements Detector {
 		try {
 			javaClass = classContext.getJavaClass();
 			if (javaClass.getMajor() >= Const.MAJOR_1_5) {
-				javaClass.accept(this);
+				try {
+					stack = new OpcodeStack();
+					super.visitClassContext(classContext);
+				} finally {
+					stack = null;
+				}
 			}
 		} finally {
 			javaClass = null;
@@ -85,6 +95,8 @@ public class UseVarArgs extends PreorderVisitor implements Detector {
 				return;
 			}
 
+			super.visitMethod(obj);
+
 			boolean isVarMethod = (obj.getAccessFlags() & Const.ACC_VARARGS) != 0;
 
 			boolean isConvertable = !isVarMethod && methodHasConvertableLastParam(obj);
@@ -98,6 +110,42 @@ public class UseVarArgs extends PreorderVisitor implements Detector {
 
 		} catch (ClassNotFoundException cnfe) {
 			bugReporter.reportMissingClass(cnfe);
+		}
+	}
+
+	@Override
+	public void visitCode(Code obj) {
+		stack.resetForMethodEntry(this);
+		super.visitCode(obj);
+	}
+
+	@Override
+	public void sawOpcode(int seen) {
+		try {
+			stack.precomputation(this);
+			switch (seen) {
+			case Const.INVOKEINTERFACE:
+			case Const.INVOKEVIRTUAL:
+			case Const.INVOKESTATIC:
+				String clsName = getClassConstantOperand();
+				String methodName = getNameConstantOperand();
+				String methodSig = getSigConstantOperand();
+				MethodInfo mi = Statistics.getStatistics().getMethodStatistics(clsName.replace('.', '/'), methodName,
+						methodSig);
+				if (mi != null && mi.isVarArg()
+						&& stack.getStackDepth() >= SignatureUtils.getNumParameters(methodSig)) {
+					OpcodeStack.Item item = stack.getStackItem(0);
+					if (item.isNull()) {
+						bugReporter.reportBug(new BugInstance(this, BugType.UVA_REMOVE_NULL_ARG.name(), NORMAL_PRIORITY)
+								.addClass(this).addMethod(this).addSourceLine(this));
+					}
+				}
+
+			}
+		} finally {
+			TernaryPatcher.pre(stack, seen);
+			stack.sawOpcode(this, seen);
+			TernaryPatcher.post(stack, seen);
 		}
 	}
 

@@ -218,7 +218,7 @@
 
 	<Detector class="com.mebigfatguy.fbcontrib.detect.WriteOnlyCollection" speed="fast" reports="WOC_WRITE_ONLY_COLLECTION_LOCAL,WOC_WRITE_ONLY_COLLECTION_FIELD" />
 
-	<Detector class="com.mebigfatguy.fbcontrib.detect.UseVarArgs" speed="fast" reports="UVA_USE_VAR_ARGS" />
+	<Detector class="com.mebigfatguy.fbcontrib.detect.UseVarArgs" speed="fast" reports="UVA_USE_VAR_ARGS,UVA_REMOVE_NULL_ARG" />
 
 	<Detector class="com.mebigfatguy.fbcontrib.detect.PossibleUnsuspectedSerialization" speed="fast" reports="PUS_POSSIBLE_UNSUSPECTED_SERIALIZATION" />
 
@@ -545,6 +545,7 @@
 	<BugPattern abbrev="WOC" type="WOC_WRITE_ONLY_COLLECTION_LOCAL" category="CORRECTNESS" />
 	<BugPattern abbrev="WOC" type="WOC_WRITE_ONLY_COLLECTION_FIELD" category="CORRECTNESS" />
 	<BugPattern abbrev="UVA" type="UVA_USE_VAR_ARGS" category="STYLE" />
+	<BugPattern abbrev="UVA" type="UVA_REMOVE_NULL_ARG" category="STYLE" />
 	<BugPattern abbrev="PUS" type="PUS_POSSIBLE_UNSUSPECTED_SERIALIZATION" category="CORRECTNESS" />
 	<BugPattern abbrev="SEC" type="SEC_SIDE_EFFECT_CONSTRUCTOR" category="STYLE" />
 	<BugPattern abbrev="SGSU" type="SGSU_SUSPICIOUS_GETTER_SETTER_USE" category="CORRECTNESS" />

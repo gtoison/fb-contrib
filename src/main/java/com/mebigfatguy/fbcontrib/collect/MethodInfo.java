@@ -27,129 +27,133 @@ import com.mebigfatguy.fbcontrib.utils.ToString;
  */
 public class MethodInfo {
 
-    public static final int PUBLIC_USE = 1;
-    public static final int PRIVATE_USE = 2;
-    public static final int PROTECTED_USE = 4;
-    public static final int PACKAGE_USE = 8;
+	public static final int PUBLIC_USE = 1;
+	public static final int PRIVATE_USE = 2;
+	public static final int PROTECTED_USE = 4;
+	public static final int PACKAGE_USE = 8;
 
-    private short numMethodBytes;
-    private byte numMethodCalls;
-    private byte immutabilityOrdinal;
-    private byte declaredAccess;
-    private byte isCalledType;
-    private boolean modifiesState;
-    private boolean canReturnNull;
-    private boolean isDerived;
+	private short numMethodBytes;
+	private byte numMethodCalls;
+	private byte immutabilityOrdinal;
+	private byte declaredAccess;
+	private byte isCalledType;
+	private boolean modifiesState;
+	private boolean canReturnNull;
+	private boolean isDerived;
 
-    public int getNumBytes() {
-        return 0x0000FFFF & numMethodBytes;
-    }
+	public int getNumBytes() {
+		return 0x0000FFFF & numMethodBytes;
+	}
 
-    public void setNumBytes(int numBytes) {
-        numMethodBytes = (short) numBytes;
-    }
+	public void setNumBytes(int numBytes) {
+		numMethodBytes = (short) numBytes;
+	}
 
-    public int getNumMethodCalls() {
-        return 0x000000FF & numMethodCalls;
-    }
+	public int getNumMethodCalls() {
+		return 0x000000FF & numMethodCalls;
+	}
 
-    public void setNumMethodCalls(int numCalls) {
-        numMethodCalls = numCalls > 255 ? Byte.MAX_VALUE : (byte) numCalls;
-    }
+	public void setNumMethodCalls(int numCalls) {
+		numMethodCalls = numCalls > 255 ? Byte.MAX_VALUE : (byte) numCalls;
+	}
 
-    public void setDeclaredAccess(int access) {
-        declaredAccess = (byte) access;
-    }
+	public void setDeclaredAccess(int access) {
+		declaredAccess = (byte) access;
+	}
 
-    public int getDeclaredAccess() {
-        return declaredAccess;
-    }
+	public int getDeclaredAccess() {
+		return declaredAccess;
+	}
 
-    public void addCallingAccess(int access) {
-        if ((access & Const.ACC_PUBLIC) != 0) {
-            isCalledType |= PUBLIC_USE;
-        } else if ((access & Const.ACC_PROTECTED) != 0) {
-            isCalledType |= PROTECTED_USE;
-        } else if ((access & Const.ACC_PRIVATE) != 0) {
-            isCalledType |= PRIVATE_USE;
-        } else {
-            isCalledType |= PACKAGE_USE;
-        }
-    }
+	public void addCallingAccess(int access) {
+		if ((access & Const.ACC_PUBLIC) != 0) {
+			isCalledType |= PUBLIC_USE;
+		} else if ((access & Const.ACC_PROTECTED) != 0) {
+			isCalledType |= PROTECTED_USE;
+		} else if ((access & Const.ACC_PRIVATE) != 0) {
+			isCalledType |= PRIVATE_USE;
+		} else {
+			isCalledType |= PACKAGE_USE;
+		}
+	}
 
-    public boolean wasCalled() {
-        return (isCalledType & (PUBLIC_USE | PROTECTED_USE | PACKAGE_USE | PRIVATE_USE)) != 0;
-    }
+	public boolean wasCalled() {
+		return (isCalledType & (PUBLIC_USE | PROTECTED_USE | PACKAGE_USE | PRIVATE_USE)) != 0;
+	}
 
-    public boolean wasCalledPublicly() {
-        return (isCalledType & PUBLIC_USE) != 0;
-    }
+	public boolean wasCalledPublicly() {
+		return (isCalledType & PUBLIC_USE) != 0;
+	}
 
-    public boolean wasCalledProtectedly() {
-        return (isCalledType & PROTECTED_USE) != 0;
-    }
+	public boolean wasCalledProtectedly() {
+		return (isCalledType & PROTECTED_USE) != 0;
+	}
 
-    public boolean wasCalledPackagely() {
-        return (isCalledType & PACKAGE_USE) != 0;
-    }
+	public boolean wasCalledPackagely() {
+		return (isCalledType & PACKAGE_USE) != 0;
+	}
 
-    public boolean wasCalledPrivately() {
-        return (isCalledType & PRIVATE_USE) != 0;
-    }
+	public boolean wasCalledPrivately() {
+		return (isCalledType & PRIVATE_USE) != 0;
+	}
 
-    public ImmutabilityType getImmutabilityType() {
-        return ImmutabilityType.values()[immutabilityOrdinal];
-    }
+	public ImmutabilityType getImmutabilityType() {
+		return ImmutabilityType.values()[immutabilityOrdinal];
+	}
 
-    public void setImmutabilityType(ImmutabilityType imType) {
-        immutabilityOrdinal = (byte) imType.ordinal();
-    }
+	public void setImmutabilityType(ImmutabilityType imType) {
+		immutabilityOrdinal = (byte) imType.ordinal();
+	}
 
-    public boolean getModifiesState() {
-        return modifiesState;
-    }
+	public boolean getModifiesState() {
+		return modifiesState;
+	}
 
-    public void setModifiesState(boolean modifiesState) {
-        this.modifiesState = modifiesState;
-    }
+	public void setModifiesState(boolean modifiesState) {
+		this.modifiesState = modifiesState;
+	}
 
-    public boolean getCanReturnNull() {
-        return canReturnNull;
-    }
+	public boolean getCanReturnNull() {
+		return canReturnNull;
+	}
 
-    public void setCanReturnNull(boolean canReturnNull) {
-        this.canReturnNull = canReturnNull;
-    }
+	public void setCanReturnNull(boolean canReturnNull) {
+		this.canReturnNull = canReturnNull;
+	}
 
-    public boolean isDerived() {
-        return isDerived;
-    }
+	public boolean isDerived() {
+		return isDerived;
+	}
 
-    public void setDerived(boolean isDerived) {
-        this.isDerived = isDerived;
-    }
+	public void setDerived(boolean isDerived) {
+		this.isDerived = isDerived;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof MethodInfo)) {
-            return false;
-        }
+	public boolean isVarArg() {
+		return (declaredAccess & Const.ACC_VARARGS) != 0;
+	}
 
-        MethodInfo mi = (MethodInfo) o;
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof MethodInfo)) {
+			return false;
+		}
 
-        return (numMethodBytes == mi.numMethodBytes) && (numMethodCalls == mi.numMethodCalls)
-                && (immutabilityOrdinal == mi.immutabilityOrdinal) && (declaredAccess == mi.declaredAccess)
-                && (isCalledType == mi.isCalledType) && (modifiesState == mi.modifiesState);
-    }
+		MethodInfo mi = (MethodInfo) o;
 
-    @Override
-    public int hashCode() {
-        return numMethodBytes ^ numMethodCalls ^ immutabilityOrdinal ^ declaredAccess ^ isCalledType
-                ^ (modifiesState ? 1 : -1);
-    }
+		return (numMethodBytes == mi.numMethodBytes) && (numMethodCalls == mi.numMethodCalls)
+				&& (immutabilityOrdinal == mi.immutabilityOrdinal) && (declaredAccess == mi.declaredAccess)
+				&& (isCalledType == mi.isCalledType) && (modifiesState == mi.modifiesState);
+	}
 
-    @Override
-    public String toString() {
-        return ToString.build(this);
-    }
+	@Override
+	public int hashCode() {
+		return numMethodBytes ^ numMethodCalls ^ immutabilityOrdinal ^ declaredAccess ^ isCalledType
+				^ (modifiesState ? 1 : -1);
+	}
+
+	@Override
+	public String toString() {
+		return ToString.build(this);
+	}
 }
