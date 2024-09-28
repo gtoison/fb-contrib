@@ -1173,9 +1173,13 @@ a[0] = new A(); // results in ArrayStoreException (Runtime)
 	<Detector class="com.mebigfatguy.fbcontrib.detect.UseVarArgs">
 		<Details>
 			<![CDATA[
-			<p>This detector looks for definitions of methods that have an array as the last parameter.
+			<p>This detector looks for problems and possibilities to use var args better. Specially looks for 
+			<ul>
+			<li>definitions of methods that have an array as the last parameter.
 			Since this class is compiled with Java 1.5 or better, it would be more flexible for clients of this
-			method to define this parameter as a vararg parameter.</p>
+			method to define this parameter as a vararg parameter</li>
+			<li>classes that have samed named vararg and non vararg methods not clearly differentiated.</li>
+			<li>Explicitly passing null to a var arg parameter</li></ul>.</p>
 			<p>It is a fast detector.</p>
 			]]>
 		</Details>
