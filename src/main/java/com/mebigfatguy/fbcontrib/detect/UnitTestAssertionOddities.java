@@ -61,7 +61,7 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
     }
 
     private enum TestFrameworkType {
-        UNKNOWN, JUNIT, TESTNG;
+        UNKNOWN, JUNIT, JUNIT5, TESTNG;
     }
 
     private static final Set<String> INJECTOR_ANNOTATIONS = UnmodifiableSet.create(
@@ -78,9 +78,11 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
     private static final String TEST_ANNOTATION_SIGNATURE = "Lorg/junit/Test;";
     private static final String OLD_ASSERT_CLASS = "junit/framework/Assert";
     private static final String NEW_ASSERT_CLASS = "org/junit/Assert";
+    private static final String JUPITER_ASSERT_CLASS = "org/junit/jupiter/api/Assertions";
 
     private static final String TESTNG_CLASS = "org.testng.annotations.Test";
     private static final String TESTNG_ANNOTATION_SIGNATURE = "Lorg/testng/annotations/Test;";
+    private static final String TESTJUPITER_ANNOTATION_SIGNATURE = "Lorg/junit/jupiter/api/Test;";
     private static final String NG_ASSERT_CLASS = "org/testng/Assert";
     private static final String NG_JUNIT_ASSERT_CLASS = "org/testng/AssertJUnit";
 
@@ -203,6 +205,11 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
                     frameworkType = TestFrameworkType.JUNIT;
                     hasAnnotation = true;
                     return;
+                } else if (TESTJUPITER_ANNOTATION_SIGNATURE.equals(annotationType)) {
+                        frameworkType = TestFrameworkType.JUNIT5;
+                        hasAnnotation = true;
+                        return;
+
                 } else if (TESTNG_ANNOTATION_SIGNATURE.equals(annotationType)) {
                     frameworkType = TestFrameworkType.TESTNG;
                     hasAnnotation = true;
@@ -229,7 +236,7 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
 
             if (seen == Const.INVOKESTATIC) {
                 String clsName = getClassConstantOperand();
-                if (OLD_ASSERT_CLASS.equals(clsName) || NEW_ASSERT_CLASS.equals(clsName)
+                if (OLD_ASSERT_CLASS.equals(clsName) || NEW_ASSERT_CLASS.equals(clsName) || JUPITER_ASSERT_CLASS.equals(clsName)
                         || NG_JUNIT_ASSERT_CLASS.equals(clsName)) {
 
                     sawAssert = true;
@@ -351,7 +358,7 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
                 String throwClass = item.getSignature();
                 if ("Ljava/lang/AssertionError;".equals(throwClass)) {
                     bugReporter.reportBug(new BugInstance(this,
-                            frameworkType == TestFrameworkType.JUNIT
+                            (frameworkType == TestFrameworkType.JUNIT || frameworkType == TestFrameworkType.JUNIT5)
                                     ? BugType.UTAO_JUNIT_ASSERTION_ODDITIES_ASSERT_USED.name()
                                     : BugType.UTAO_TESTNG_ASSERTION_ODDITIES_ASSERT_USED.name(),
                             NORMAL_PRIORITY).addClass(this).addMethod(this).addSourceLine(this));
