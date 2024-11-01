@@ -170,7 +170,7 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
 
             if (!sawAssert && !hasExpects()) {
                 bugReporter.reportBug(new BugInstance(this,
-                        frameworkType == TestFrameworkType.JUNIT
+                        (frameworkType == TestFrameworkType.JUNIT || frameworkType == TestFrameworkType.JUNIT5) 
                                 ? BugType.UTAO_JUNIT_ASSERTION_ODDITIES_NO_ASSERT.name()
                                 : BugType.UTAO_TESTNG_ASSERTION_ODDITIES_NO_ASSERT.name(),
                         LOW_PRIORITY).addClass(this).addMethod(this));
