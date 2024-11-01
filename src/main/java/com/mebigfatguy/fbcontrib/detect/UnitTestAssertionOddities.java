@@ -249,7 +249,7 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
                     }
 
                     String methodName = getNameConstantOperand();
-                    if ("assertEquals".equals(methodName) && processAssert()) {
+                    if ("assertEquals".equals(methodName) && processAssert(frameworkType)) {
                         return;
                     } else if ("assertNotEquals".equals(methodName)) {
                         String signature = getSigConstantOperand();
@@ -445,21 +445,31 @@ public class UnitTestAssertionOddities extends BytecodeScanningDetector {
         }
     }
 
-    private boolean processAssert() {
+    private boolean processAssert(TestFrameworkType frameworkType) {
         String signature = getSigConstantOperand();
         List<String> argTypes = SignatureUtils.getParameterSignatures(signature);
         if (((argTypes.size() == 2) || (argTypes.size() == 3)) && (stack.getStackDepth() >= 2)) {
-            OpcodeStack.Item item0 = stack.getStackItem(0);
-            OpcodeStack.Item expectedItem = stack.getStackItem(1);
+        	
+            OpcodeStack.Item actualItem;
+            OpcodeStack.Item expectedItem;
+            
+            if (frameworkType == TestFrameworkType.JUNIT5) {
+            	actualItem = stack.getStackItem((argTypes.size() == 3 ? 1 : 0));
+            	expectedItem = stack.getStackItem((argTypes.size() == 3 ? 2 : 1));
+            } else {
+            	actualItem = stack.getStackItem(0);
+            	expectedItem = stack.getStackItem(1);
+            }
+            
             Object cons1 = expectedItem.getConstant();
             if ((cons1 != null) && BOOLEAN_TYPE_SIGNATURE.equals(expectedItem.getSignature())
-                    && BOOLEAN_TYPE_SIGNATURE.equals(item0.getSignature())) {
+                    && BOOLEAN_TYPE_SIGNATURE.equals(actualItem.getSignature())) {
                 bugReporter.reportBug(new BugInstance(this, BugType.UTAO_JUNIT_ASSERTION_ODDITIES_BOOLEAN_ASSERT.name(),
                         NORMAL_PRIORITY).addClass(this).addMethod(this).addSourceLine(this));
                 return true;
             }
-            if ((cons1 == null) && (item0.getConstant() != null)
-                    && ((argTypes.size() == 2) || !isFloatingPtPrimitive(item0.getSignature()))) {
+            if ((cons1 == null) && (actualItem.getConstant() != null)
+                    && ((argTypes.size() == 2) || !isFloatingPtPrimitive(actualItem.getSignature()))) {
                 bugReporter
                         .reportBug(new BugInstance(this, BugType.UTAO_JUNIT_ASSERTION_ODDITIES_ACTUAL_CONSTANT.name(),
                                 NORMAL_PRIORITY).addClass(this).addMethod(this).addSourceLine(this));
