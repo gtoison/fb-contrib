@@ -74,11 +74,11 @@ public class OI_Sample implements OptInf386 {
     	return foo.equals(Optional.empty());
     }
     
-    public 	Optional<Object> getOpt386() {
+    public 	Optional<Object> fpGetOpt386() {
     	return Optional.of(Double.valueOf(10));
     }
 }
 
 interface OptInf386 {
-	Optional<Object> getOpt386();
+	Optional<Object> fpGetOpt386();
 }

@@ -36,7 +36,7 @@
 	<classpathentry kind="lib" path="lib/asm-9.6.jar"/>
 	<classpathentry kind="lib" path="lib/asm-tree-9.6.jar"/>
 	<classpathentry kind="lib" path="lib/bcel-6.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/spotbugs-4.8.3.jar"/>
+	<classpathentry kind="lib" path="lib/spotbugs-4.8.3.jar" sourcepath="lib/sources/spotbugs-4.8.3-sources.jar"/>
 	<classpathentry kind="lib" path="lib/spotbugs-annotations-4.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.16.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.15.1.jar"/>
