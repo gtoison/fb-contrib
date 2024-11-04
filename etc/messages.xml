@@ -6208,6 +6208,7 @@ if (shouldCalcHalting && (calculateHaltingProbability() &gt; 0) { }
     		<p>Unfortunately there isn't just one @Nullable annotation, but this detector will recognize:</p>
     		<ul>
     		<li>org.jetbrains.annotations.Nullable</li>
+	        <li>jakarta.annotation.Nullable</li>
 	        <li>javax.annotation.Nullable</li>
 	        <li>javax.annotation.CheckForNull</li>
 	        <li>edu.umd.cs.findbugs.annotations.Nullable</li>
